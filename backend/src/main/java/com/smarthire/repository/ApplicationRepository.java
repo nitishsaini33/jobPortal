@@ -5,6 +5,7 @@ import com.smarthire.enums.ApplicationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -90,4 +91,11 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
      * Counts total applications for a specific job.
      */
     long countByJobId(Long jobId);
+
+    /**
+     * Deletes all applications for a specific job (used when deleting a job).
+     */
+    @Modifying
+    @Query("DELETE FROM Application a WHERE a.job.id = :jobId")
+    void deleteByJobId(@Param("jobId") Long jobId);
 }

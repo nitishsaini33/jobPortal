@@ -85,6 +85,10 @@ public class JobService {
     public void deleteJob(Long jobId, String recruiterEmail) {
         Job job = getJobById(jobId);
         validateOwnership(job, recruiterEmail);
+        
+        // Delete all associated applications first to prevent FK constraint failure
+        applicationRepository.deleteByJobId(jobId);
+        
         jobRepository.delete(job);
     }
 
