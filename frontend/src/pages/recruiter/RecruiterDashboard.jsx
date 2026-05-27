@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { jobsAPI, applicationsAPI } from '../../api/axios';
+import { getCachedData, setCachedData } from '../../utils/cache';
+import { useAuth } from '../../context/AuthContext';
 import JobForm from './JobForm';
 
 /**
@@ -10,6 +12,7 @@ import JobForm from './JobForm';
  * - Quick access to applicant tracking and candidate search
  */
 export default function RecruiterDashboard() {
+  const { user } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -22,7 +25,24 @@ export default function RecruiterDashboard() {
   const navigate = useNavigate();
 
   const fetchJobs = async (p = 0) => {
-    setLoading(true);
+    if (!user) return;
+    const cacheKey = `cache_recruiter_dashboard_${user.id}_${p}`;
+
+    const cached = getCachedData(cacheKey);
+    if (cached) {
+      setJobs(cached.content);
+      setTotalPages(cached.totalPages);
+      setPage(cached.number);
+      
+      const totalJobs = cached.totalElements;
+      const totalApplicants = cached.content.reduce((sum, j) => sum + j.applicationCount, 0);
+      setStats(prev => ({ ...prev, totalJobs, totalApplicants }));
+      
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+
     try {
       const res = await jobsAPI.getMyJobs(p, 10);
       setJobs(res.data.content);
@@ -33,6 +53,8 @@ export default function RecruiterDashboard() {
       const totalJobs = res.data.totalElements;
       const totalApplicants = res.data.content.reduce((sum, j) => sum + j.applicationCount, 0);
       setStats(prev => ({ ...prev, totalJobs, totalApplicants }));
+      
+      setCachedData(cacheKey, res.data);
     } catch (err) {
       console.error('Failed to fetch jobs:', err);
     } finally {

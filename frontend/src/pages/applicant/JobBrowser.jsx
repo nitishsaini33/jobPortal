@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { jobsAPI, applicationsAPI } from '../../api/axios';
+import { getCachedData, setCachedData } from '../../utils/cache';
+import { useAuth } from '../../context/AuthContext';
 import ApplicationForm from './ApplicationForm';
 
 /**
@@ -9,6 +11,7 @@ import ApplicationForm from './ApplicationForm';
  * - Apply modal with resume upload
  */
 export default function JobBrowser() {
+  const { user } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -38,9 +41,24 @@ export default function JobBrowser() {
   };
 
   const fetchJobs = useCallback(async (p = 0, filtersToUse = activeFilters) => {
-    setLoading(true);
+    if (!user) return;
+    const hasFilters = Object.values(filtersToUse).some(v => v !== '' && v !== undefined);
+    const cacheKey = `cache_jobs_search_${user.id}_${p}_${JSON.stringify(filtersToUse)}`;
+    
+    // 1. Instantly load from cache if available
+    const cached = getCachedData(cacheKey);
+    if (cached) {
+      setJobs(cached.content);
+      setTotalPages(cached.totalPages);
+      setTotalElements(cached.totalElements);
+      setPage(cached.number);
+      setLoading(false); // Stop loading spinner immediately
+    } else {
+      setLoading(true); // Only show spinner if no cache
+    }
+
     try {
-      const hasFilters = Object.values(filtersToUse).some(v => v !== '' && v !== undefined);
+      // 2. Fetch fresh data in the background
       let res;
       if (hasFilters) {
         // Use search endpoint when filters are active
@@ -51,19 +69,24 @@ export default function JobBrowser() {
         };
         res = await jobsAPI.searchJobs(params);
       } else {
-        // Use simple getOpenJobs for default browse (no FULLTEXT dependency)
+        // Use simple getOpenJobs for default browse
         res = await jobsAPI.getOpenJobs(p, 9);
       }
+      
+      // 3. Update state with fresh data
       setJobs(res.data.content);
       setTotalPages(res.data.totalPages);
       setTotalElements(res.data.totalElements);
       setPage(res.data.number);
+      
+      // 4. Save to cache
+      setCachedData(cacheKey, res.data);
     } catch (err) {
       console.error('Failed to fetch jobs:', err);
     } finally {
       setLoading(false);
     }
-  }, [activeFilters]);
+  }, [activeFilters, user]);
 
   useEffect(() => { 
     fetchJobs(0, {}); 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { applicationsAPI } from '../../api/axios';
+import { getCachedData, setCachedData } from '../../utils/cache';
 import { useAuth } from '../../context/AuthContext';
 
 const STATUS_COLORS = {
@@ -23,7 +24,27 @@ export default function ApplicantDashboard() {
   const [stats, setStats] = useState({ total: 0, shortlisted: 0, offered: 0, pending: 0 });
 
   const fetchApplications = async (p = 0) => {
-    setLoading(true);
+    if (!user) return;
+    const cacheKey = `cache_applicant_dashboard_${user.id}_${p}`;
+    
+    const cached = getCachedData(cacheKey);
+    if (cached) {
+      setApplications(cached.content);
+      setTotalPages(cached.totalPages);
+      setPage(cached.number);
+      
+      const total = cached.totalElements;
+      const apps = cached.content;
+      const shortlisted = apps.filter(a => a.status === 'SHORTLISTED').length;
+      const offered = apps.filter(a => a.status === 'OFFERED').length;
+      const pending = apps.filter(a => ['APPLIED', 'REVIEWED'].includes(a.status)).length;
+      setStats({ total, shortlisted, offered, pending });
+      
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+
     try {
       const res = await applicationsAPI.getMyApplications(p, 10);
       const apps = res.data.content;
@@ -37,6 +58,8 @@ export default function ApplicantDashboard() {
       const offered = apps.filter(a => a.status === 'OFFERED').length;
       const pending = apps.filter(a => ['APPLIED', 'REVIEWED'].includes(a.status)).length;
       setStats({ total, shortlisted, offered, pending });
+      
+      setCachedData(cacheKey, res.data);
     } catch (err) {
       console.error('Failed to fetch applications:', err);
     } finally {
