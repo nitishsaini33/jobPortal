@@ -21,15 +21,17 @@ public class CorsConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",                          // Vite dev server
                 "http://localhost:3000",                          // Fallback for CRA
-                "https://job-portal-gray-omega.vercel.app"       // Vercel production
+                "https://job-portal-gray-omega.vercel.app",       // Old Vercel production
+                "https://job-portal-n-seven.vercel.app"           // New Vercel production
         ));
+        config.setAllowedOriginPatterns(List.of("https://*.vercel.app")); // Allow all vercel preview URLs
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", config);
+        source.registerCorsConfiguration("/**", config); // Apply to all paths including 404s
         return source;
     }
 }
