@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { usersAPI } from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 import EducationForm from '../../components/EducationForm';
+import SkillsInput from '../../components/SkillsInput';
 
 export default function UserProfile() {
   const { user } = useAuth();
@@ -226,26 +227,12 @@ export default function UserProfile() {
                 />
               </div>
               <div className="form-group">
-                <label>Skills (comma separated)</label>
-                <div className="input-icon-wrapper">
-                  <span className="input-icon">🛠️</span>
-                  <input
-                    type="text"
-                    name="skills"
-                    value={formData.skills}
-                    onChange={handleChange}
-                    placeholder="e.g. Java, React, SQL, Project Management"
-                    className="input-with-icon"
-                  />
-                </div>
+                <label>Skills</label>
+                <SkillsInput
+                  skills={formData.skills}
+                  onChange={(val) => setFormData(prev => ({ ...prev, skills: val }))}
+                />
               </div>
-              {skillList.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '-0.5rem' }}>
-                  {skillList.map((skill, i) => (
-                    <span key={i} className="skill-tag">{skill}</span>
-                  ))}
-                </div>
-              )}
             </div>
           )}
 
