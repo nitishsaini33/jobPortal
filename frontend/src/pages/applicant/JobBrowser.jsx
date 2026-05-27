@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { jobsAPI } from '../../api/axios';
+import { jobsAPI, applicationsAPI } from '../../api/axios';
 import ApplicationForm from './ApplicationForm';
 
 /**
@@ -15,6 +15,7 @@ export default function JobBrowser() {
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(true);
   const [applyingJob, setApplyingJob] = useState(null);
+  const [appliedJobIds, setAppliedJobIds] = useState(new Set());
 
   const [filters, setFilters] = useState({
     keyword: '',
@@ -25,6 +26,16 @@ export default function JobBrowser() {
     experienceMax: '',
   });
   const [activeFilters, setActiveFilters] = useState({});
+
+  const fetchAppliedJobs = async () => {
+    try {
+      const res = await applicationsAPI.getMyApplications(0, 1000);
+      const ids = new Set(res.data.content.map(app => app.jobId));
+      setAppliedJobIds(ids);
+    } catch (err) {
+      console.error('Failed to fetch applied jobs:', err);
+    }
+  };
 
   const fetchJobs = useCallback(async (p = 0, filtersToUse = activeFilters) => {
     setLoading(true);
@@ -54,7 +65,10 @@ export default function JobBrowser() {
     }
   }, [activeFilters]);
 
-  useEffect(() => { fetchJobs(0, {}); }, []);
+  useEffect(() => { 
+    fetchJobs(0, {}); 
+    fetchAppliedJobs();
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -208,12 +222,18 @@ export default function JobBrowser() {
                   <span className="job-card-salary">
                     {formatSalary(job.salaryMin, job.salaryMax) || 'Salary not specified'}
                   </span>
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() => setApplyingJob(job)}
-                  >
-                    Apply Now →
-                  </button>
+                  {appliedJobIds.has(job.id) ? (
+                    <button className="btn btn-outline btn-sm" disabled style={{ color: 'var(--color-success)', borderColor: 'var(--color-success)' }}>
+                      Applied ✓
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => setApplyingJob(job)}
+                    >
+                      Apply Now →
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -240,7 +260,10 @@ export default function JobBrowser() {
           job={applyingJob}
           onClose={(applied) => {
             setApplyingJob(null);
-            if (applied) fetchJobs(page);
+            if (applied) {
+              fetchAppliedJobs();
+              fetchJobs(page);
+            }
           }}
         />
       )}
