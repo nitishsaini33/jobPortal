@@ -19,8 +19,9 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
-                "http://localhost:5173",   // Vite dev server
-                "http://localhost:3000"    // Fallback for CRA or other setups
+                "http://localhost:5173",                          // Vite dev server
+                "http://localhost:3000",                          // Fallback for CRA
+                "https://job-portal-gray-omega.vercel.app"       // Vercel production
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
