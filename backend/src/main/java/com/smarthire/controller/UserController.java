@@ -21,6 +21,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserProfile(authentication.getName()));
     }
 
+    @GetMapping("/profile/{id}")
+    public ResponseEntity<UserProfileDto> getProfileById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserProfileById(id));
+    }
+
     @PutMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserProfileDto> updateProfile(
             @RequestPart("profile") UserProfileDto profileDto,

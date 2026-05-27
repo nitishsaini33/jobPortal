@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { applicationsAPI } from '../../api/axios';
+import ApplicantProfileModal from './ApplicantProfileModal';
 
 const STATUS_OPTIONS = ['APPLIED', 'REVIEWED', 'SHORTLISTED', 'INTERVIEWED', 'OFFERED', 'REJECTED'];
 
@@ -21,6 +22,7 @@ export default function ApplicantList() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
   const [updatingId, setUpdatingId] = useState(null);
+  const [viewingProfileId, setViewingProfileId] = useState(null);
 
   const fetchApplications = async (p = 0) => {
     setLoading(true);
@@ -132,8 +134,19 @@ export default function ApplicantList() {
               <tbody>
                 {applications.map((app) => (
                   <tr key={app.id}>
-                    <td style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
-                      {app.applicantName}
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>
+                          {app.applicantName}
+                        </span>
+                        <button 
+                          className="btn btn-ghost btn-sm" 
+                          onClick={() => setViewingProfileId(app.applicantId)}
+                          style={{ padding: '0.25rem 0.5rem', fontSize: '0.7rem' }}
+                        >
+                          👁️ Profile
+                        </button>
+                      </div>
                     </td>
                     <td>{app.applicantEmail}</td>
                     <td>
@@ -205,6 +218,13 @@ export default function ApplicantList() {
           </>
         )}
       </div>
+      {/* Applicant Profile Modal */}
+      {viewingProfileId && (
+        <ApplicantProfileModal 
+          applicantId={viewingProfileId} 
+          onClose={() => setViewingProfileId(null)} 
+        />
+      )}
     </div>
   );
 }

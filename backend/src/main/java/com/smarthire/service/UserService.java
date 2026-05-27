@@ -21,6 +21,12 @@ public class UserService {
         return mapToDto(user);
     }
 
+    public UserProfileDto getUserProfileById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return mapToDto(user);
+    }
+
     @Transactional
     public UserProfileDto updateUserProfile(String email, UserProfileDto dto, MultipartFile resumeFile) {
         User user = userRepository.findByEmail(email)

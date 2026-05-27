@@ -102,6 +102,7 @@ export const applicationsAPI = {
 // ── Users API ──
 export const usersAPI = {
   getProfile: () => api.get('/users/profile'),
+  getProfileById: (id) => api.get(`/users/profile/${id}`),
   updateProfile: (profileData, resumeFile) => {
     const formData = new FormData();
     formData.append(
