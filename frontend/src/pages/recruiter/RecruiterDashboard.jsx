@@ -161,28 +161,28 @@ export default function RecruiterDashboard() {
               <tbody>
                 {jobs.map((job) => (
                   <tr key={job.id}>
-                    <td style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{job.title}</td>
-                    <td>{job.company}</td>
-                    <td>{job.location || '—'}</td>
-                    <td>
+                    <td data-label="Job Title" style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{job.title}</td>
+                    <td data-label="Company">{job.company}</td>
+                    <td data-label="Location">{job.location || '—'}</td>
+                    <td data-label="Type">
                       <span className="badge badge-applied">
                         {job.employmentType?.replace('_', ' ')}
                       </span>
                     </td>
-                    <td>{formatSalary(job.salaryMin, job.salaryMax)}</td>
-                    <td>
+                    <td data-label="Salary">{formatSalary(job.salaryMin, job.salaryMax)}</td>
+                    <td data-label="Applicants">
                       <Link to={`/recruiter/applicants/${job.id}`}
                         style={{ color: 'var(--color-primary-light)', fontWeight: 600 }}>
                         {job.applicationCount}
                       </Link>
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <span className={`badge badge-${job.status?.toLowerCase()}`}>
                         {job.status}
                       </span>
                     </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <td data-label="Actions">
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                         <button className="btn btn-ghost btn-sm" onClick={() => handleEdit(job)}
                           title="Edit">✏️</button>
                         <Link to={`/recruiter/applicants/${job.id}`} className="btn btn-ghost btn-sm"

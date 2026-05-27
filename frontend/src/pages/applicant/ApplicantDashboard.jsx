@@ -152,12 +152,12 @@ export default function ApplicantDashboard() {
 
                   return (
                     <tr key={app.id}>
-                      <td style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
+                      <td data-label="Job Title" style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
                         {app.jobTitle}
                       </td>
-                      <td>{app.jobCompany}</td>
-                      <td>{formatDate(app.appliedAt)}</td>
-                      <td style={{ minWidth: '140px' }}>
+                      <td data-label="Company">{app.jobCompany}</td>
+                      <td data-label="Applied">{formatDate(app.appliedAt)}</td>
+                      <td data-label="Pipeline" style={{ minWidth: '140px' }}>
                         <div style={{
                           height: '6px', background: 'var(--border-color)',
                           borderRadius: '3px', overflow: 'hidden'
@@ -175,7 +175,7 @@ export default function ApplicantDashboard() {
                           {pct}% complete
                         </div>
                       </td>
-                      <td>
+                      <td data-label="Status">
                         <span className={`badge badge-${STATUS_COLORS[app.status]}`}>
                           {app.status}
                         </span>
@@ -185,7 +185,7 @@ export default function ApplicantDashboard() {
                           </div>
                         )}
                       </td>
-                      <td>
+                      <td data-label="Actions">
                         {!['WITHDRAWN', 'REJECTED', 'OFFERED'].includes(app.status) && (
                           <button className="btn btn-ghost btn-sm"
                             onClick={() => handleWithdraw(app.id)}

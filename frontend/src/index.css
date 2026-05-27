@@ -1223,6 +1223,47 @@ tr:last-child td {
   .filter-row {
     flex-direction: column;
   }
+
+  /* Responsive Tables (Card Layout) */
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+  
+  thead tr {
+    display: none; /* Hide headers */
+  }
+  
+  tr {
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+  }
+  
+  td {
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+    padding-left: 50% !important;
+    text-align: right;
+    white-space: normal; /* allow wrapping on mobile */
+  }
+  
+  td:last-child {
+    border-bottom: 0;
+  }
+  
+  td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 1rem;
+    width: 45%;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
 }
 
 @media (max-width: 480px) {
