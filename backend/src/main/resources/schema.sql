@@ -116,42 +116,12 @@ CREATE TABLE IF NOT EXISTS applications (
     FULLTEXT INDEX ft_apps_skills (skills)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
 -- ============================================================
 -- 6. ENSURE FULLTEXT INDEXES EXIST
---    (needed when Hibernate creates tables before schema.sql runs)
+--    (plain ALTER TABLE statements; duplicates are safely ignored
+--     via spring.sql.init.continue-on-error=true)
 -- ============================================================
-DROP PROCEDURE IF EXISTS ensure_fulltext_indexes;
-
-DELIMITER //
-CREATE PROCEDURE ensure_fulltext_indexes()
-BEGIN
-    -- FULLTEXT on jobs(title, description)
-    IF NOT EXISTS (
-        SELECT 1 FROM information_schema.STATISTICS
-        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'jobs' AND INDEX_NAME = 'ft_jobs_title_desc'
-    ) THEN
-        ALTER TABLE jobs ADD FULLTEXT INDEX ft_jobs_title_desc (title, description);
-    END IF;
-
-    -- FULLTEXT on jobs(required_skills)
-    IF NOT EXISTS (
-        SELECT 1 FROM information_schema.STATISTICS
-        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'jobs' AND INDEX_NAME = 'ft_jobs_skills'
-    ) THEN
-        ALTER TABLE jobs ADD FULLTEXT INDEX ft_jobs_skills (required_skills);
-    END IF;
-
-    -- FULLTEXT on applications(skills)
-    IF NOT EXISTS (
-        SELECT 1 FROM information_schema.STATISTICS
-        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'applications' AND INDEX_NAME = 'ft_apps_skills'
-    ) THEN
-        ALTER TABLE applications ADD FULLTEXT INDEX ft_apps_skills (skills);
-    END IF;
-END //
-DELIMITER ;
-
-CALL ensure_fulltext_indexes();
-DROP PROCEDURE IF EXISTS ensure_fulltext_indexes;
+ALTER TABLE jobs ADD FULLTEXT INDEX ft_jobs_title_desc (title, description);
+ALTER TABLE jobs ADD FULLTEXT INDEX ft_jobs_skills (required_skills);
+ALTER TABLE applications ADD FULLTEXT INDEX ft_apps_skills (skills);
 
