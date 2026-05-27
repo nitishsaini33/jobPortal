@@ -41,6 +41,30 @@ public class User {
     @Column(name = "profile_summary", columnDefinition = "TEXT")
     private String profileSummary;
 
+    @Column(name = "dob")
+    private java.time.LocalDate dob;
+
+    @Column(name = "resume_url", length = 500)
+    private String resumeUrl;
+
+    @Column(name = "skills", columnDefinition = "TEXT")
+    private String skills;
+
+    @Column(name = "education", columnDefinition = "TEXT")
+    private String education;
+
+    @Column(name = "experience", columnDefinition = "TEXT")
+    private String experience;
+
+    @Column(name = "linkedin_url")
+    private String linkedinUrl;
+
+    @Column(name = "github_url")
+    private String githubUrl;
+
+    @Column(name = "portfolio_url")
+    private String portfolioUrl;
+
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;

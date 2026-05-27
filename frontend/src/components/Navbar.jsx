@@ -57,6 +57,7 @@ export default function Navbar() {
                 <>
                   <Link to="/applicant/dashboard" className="nav-link" onClick={closeMenu}>Dashboard</Link>
                   <Link to="/applicant/jobs" className="nav-link" onClick={closeMenu}>Browse Jobs</Link>
+                  <Link to="/applicant/profile" className="nav-link" onClick={closeMenu}>My Profile</Link>
                 </>
               )}
               <div className="nav-user">

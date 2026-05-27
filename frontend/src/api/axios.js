@@ -95,4 +95,22 @@ export const applicationsAPI = {
   withdraw: (id) => api.patch(`/applications/${id}/withdraw`),
 };
 
+// ── Users API ──
+export const usersAPI = {
+  getProfile: () => api.get('/users/profile'),
+  updateProfile: (profileData, resumeFile) => {
+    const formData = new FormData();
+    formData.append(
+      'profile',
+      new Blob([JSON.stringify(profileData)], { type: 'application/json' })
+    );
+    if (resumeFile) {
+      formData.append('resume', resumeFile);
+    }
+    return api.put('/users/profile', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+};
+
 export default api;

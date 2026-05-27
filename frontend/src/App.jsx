@@ -15,6 +15,7 @@ import CandidateSearch from './pages/recruiter/CandidateSearch';
 // Applicant pages
 import ApplicantDashboard from './pages/applicant/ApplicantDashboard';
 import JobBrowser from './pages/applicant/JobBrowser';
+import UserProfile from './pages/applicant/UserProfile';
 
 /**
  * Root application with full routing:
@@ -110,6 +111,14 @@ export default function App() {
           element={
             <ProtectedRoute requiredRole="APPLICANT">
               <JobBrowser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/applicant/profile"
+          element={
+            <ProtectedRoute requiredRole="APPLICANT">
+              <UserProfile />
             </ProtectedRoute>
           }
         />
