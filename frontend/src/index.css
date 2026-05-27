@@ -1642,6 +1642,74 @@ tr:last-child td {
 }
 
 /* ================================================================
+   EDUCATION FORM
+   ================================================================ */
+.edu-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.edu-entry {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: border-color var(--transition-fast);
+}
+
+.edu-entry:hover {
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.edu-entry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.edu-entry-number {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-primary-light);
+}
+
+.edu-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.edu-checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.edu-add-btn {
+  align-self: flex-start;
+  border-style: dashed;
+  transition: all var(--transition-fast);
+}
+
+.edu-add-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-light);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.required {
+  color: var(--color-error);
+}
+
+/* ================================================================
    RESPONSIVE
    ================================================================ */
 @media (max-width: 768px) {

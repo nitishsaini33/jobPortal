@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { usersAPI } from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
+import EducationForm from '../../components/EducationForm';
 
 export default function UserProfile() {
   const { user } = useAuth();
@@ -255,25 +256,26 @@ export default function UserProfile() {
                 <h3>🎓 Education & Experience</h3>
                 <p>Your academic and professional background</p>
               </div>
-              <div className="form-group">
-                <label>🎓 Education</label>
-                <textarea
-                  name="education"
-                  value={formData.education}
-                  onChange={handleChange}
-                  rows="4"
-                  placeholder={"B.S. in Computer Science\nUniversity of Technology (2018-2022)\nGPA: 3.8/4.0"}
-                />
-              </div>
-              <div className="form-group">
-                <label>💼 Experience</label>
-                <textarea
-                  name="experience"
-                  value={formData.experience}
-                  onChange={handleChange}
-                  rows="4"
-                  placeholder={"Software Engineer at TechCorp\nJan 2022 - Present\n• Built scalable APIs serving 1M+ requests/day"}
-                />
+
+              <EducationForm
+                educationJson={formData.education}
+                onChange={(val) => setFormData(prev => ({ ...prev, education: val }))}
+              />
+
+              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
+                <div className="profile-section-header">
+                  <h3>💼 Work Experience</h3>
+                  <p>Your professional work history</p>
+                </div>
+                <div className="form-group">
+                  <textarea
+                    name="experience"
+                    value={formData.experience}
+                    onChange={handleChange}
+                    rows="4"
+                    placeholder={"Software Engineer at TechCorp\nJan 2022 - Present\n• Built scalable APIs serving 1M+ requests/day"}
+                  />
+                </div>
               </div>
             </div>
           )}
