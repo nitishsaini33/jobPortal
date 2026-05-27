@@ -36,7 +36,13 @@ export default function RecruiterDashboard() {
       
       const totalJobs = cached.totalElements;
       const totalApplicants = cached.content.reduce((sum, j) => sum + j.applicationCount, 0);
-      setStats(prev => ({ ...prev, totalJobs, totalApplicants }));
+      
+      // If stats were cached from the new logic, use them, otherwise fallback to 0
+      if (cached.__stats) {
+        setStats(cached.__stats);
+      } else {
+        setStats(prev => ({ ...prev, totalJobs, totalApplicants }));
+      }
       
       setLoading(false);
     } else {
@@ -44,7 +50,13 @@ export default function RecruiterDashboard() {
     }
 
     try {
-      const res = await jobsAPI.getMyJobs(p, 10);
+      const [res, shortlistedRes, pendingRes, reviewedRes] = await Promise.all([
+        jobsAPI.getMyJobs(p, 10),
+        applicationsAPI.searchCandidates({ status: 'SHORTLISTED', size: 1 }),
+        applicationsAPI.searchCandidates({ status: 'APPLIED', size: 1 }),
+        applicationsAPI.searchCandidates({ status: 'REVIEWED', size: 1 })
+      ]);
+
       setJobs(res.data.content);
       setTotalPages(res.data.totalPages);
       setPage(res.data.number);
@@ -52,9 +64,14 @@ export default function RecruiterDashboard() {
       // Compute stats
       const totalJobs = res.data.totalElements;
       const totalApplicants = res.data.content.reduce((sum, j) => sum + j.applicationCount, 0);
-      setStats(prev => ({ ...prev, totalJobs, totalApplicants }));
+      const shortlisted = shortlistedRes.data.totalElements;
+      const pending = pendingRes.data.totalElements + reviewedRes.data.totalElements;
       
-      setCachedData(cacheKey, res.data);
+      const newStats = { totalJobs, totalApplicants, shortlisted, pending };
+      setStats(newStats);
+      
+      // Update cache with both jobs and the computed stats
+      setCachedData(cacheKey, { ...res.data, __stats: newStats });
     } catch (err) {
       console.error('Failed to fetch jobs:', err);
     } finally {
