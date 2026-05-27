@@ -29,12 +29,20 @@ export default function JobBrowser() {
   const fetchJobs = useCallback(async (p = 0, filtersToUse = activeFilters) => {
     setLoading(true);
     try {
-      const params = {
-        page: p, size: 9,
-        status: 'OPEN',
-        ...Object.fromEntries(Object.entries(filtersToUse).filter(([, v]) => v !== '')),
-      };
-      const res = await jobsAPI.searchJobs(params);
+      const hasFilters = Object.values(filtersToUse).some(v => v !== '' && v !== undefined);
+      let res;
+      if (hasFilters) {
+        // Use search endpoint when filters are active
+        const params = {
+          page: p, size: 9,
+          status: 'OPEN',
+          ...Object.fromEntries(Object.entries(filtersToUse).filter(([, v]) => v !== '')),
+        };
+        res = await jobsAPI.searchJobs(params);
+      } else {
+        // Use simple getOpenJobs for default browse (no FULLTEXT dependency)
+        res = await jobsAPI.getOpenJobs(p, 9);
+      }
       setJobs(res.data.content);
       setTotalPages(res.data.totalPages);
       setTotalElements(res.data.totalElements);
