@@ -18,6 +18,7 @@ export default function Register() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -67,7 +68,10 @@ export default function Register() {
       <div className="auth-container">
         <div className="auth-card auth-card-register">
           <div className="auth-header">
-            <div className="auth-icon">🚀</div>
+            <div className="auth-logo">
+              <span className="auth-logo-icon">💼</span>
+              <span className="auth-logo-text">SmartHire</span>
+            </div>
             <h1>Create Account</h1>
             <p>Join SmartHire and start your journey</p>
           </div>
@@ -80,9 +84,8 @@ export default function Register() {
 
           <GoogleAuthButton />
 
-          <div style={{ textAlign: 'center', margin: '1rem 0', color: 'var(--text-muted)', fontSize: '0.9rem', position: 'relative' }}>
-            <span style={{ background: 'var(--bg-card)', padding: '0 10px', position: 'relative', zIndex: 1 }}>OR</span>
-            <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: 'var(--border-color)', zIndex: 0 }}></div>
+          <div className="auth-divider">
+            <span>or register with email</span>
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
@@ -110,73 +113,93 @@ export default function Register() {
 
             <div className="form-group">
               <label htmlFor="fullName">Full Name</label>
-              <input
-                id="fullName"
-                name="fullName"
-                type="text"
-                value={formData.fullName}
-                onChange={handleChange}
-                placeholder="John Doe"
-                required
-                autoFocus
-              />
+              <div className="input-icon-wrapper">
+                <span className="input-icon">👤</span>
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  placeholder="John Doe"
+                  required
+                  autoFocus
+                  className="input-with-icon"
+                />
+              </div>
             </div>
 
             <div className="form-group">
               <label htmlFor="reg-email">Email Address</label>
-              <input
-                id="reg-email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                required
-              />
+              <div className="input-icon-wrapper">
+                <span className="input-icon">✉️</span>
+                <input
+                  id="reg-email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="you@example.com"
+                  required
+                  className="input-with-icon"
+                />
+              </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="reg-password">Password</label>
-                <input
-                  id="reg-password"
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Min. 6 characters"
-                  required
-                />
+                <div className="input-icon-wrapper">
+                  <span className="input-icon">🔒</span>
+                  <input
+                    id="reg-password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Min. 6 characters"
+                    required
+                    className="input-with-icon"
+                  />
+                </div>
               </div>
               <div className="form-group">
                 <label htmlFor="confirmPassword">Confirm Password</label>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="Repeat password"
-                  required
-                />
+                <div className="input-icon-wrapper">
+                  <span className="input-icon">🔒</span>
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Repeat password"
+                    required
+                    className="input-with-icon"
+                  />
+                </div>
               </div>
             </div>
 
             <div className="form-group">
               <label htmlFor="phone">Phone (Optional)</label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="+1 (555) 123-4567"
-              />
+              <div className="input-icon-wrapper">
+                <span className="input-icon">📱</span>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="+1 (555) 123-4567"
+                  className="input-with-icon"
+                />
+              </div>
             </div>
 
             <button
               type="submit"
-              className="btn btn-primary btn-full"
+              className="btn btn-primary btn-full btn-auth-submit"
               disabled={loading}
             >
               {loading ? (
@@ -184,7 +207,7 @@ export default function Register() {
                   <span className="spinner-sm"></span> Creating account...
                 </span>
               ) : (
-                'Create Account'
+                <>Create Account <span className="btn-arrow">→</span></>
               )}
             </button>
           </form>
@@ -198,13 +221,51 @@ export default function Register() {
         </div>
 
         <div className="auth-decoration">
+          <div className="auth-decoration-bg">
+            <div className="floating-shape shape-1"></div>
+            <div className="floating-shape shape-2"></div>
+            <div className="floating-shape shape-3"></div>
+          </div>
           <div className="decoration-content">
             <h2>SmartHire Portal</h2>
-            <p>Your intelligent recruitment companion. Connect talent with opportunity.</p>
+            <p>Your intelligent recruitment companion. Connect talent with opportunity seamlessly.</p>
             <div className="decoration-features">
-              <div className="feature-item">✓ AI-Powered Candidate Search</div>
-              <div className="feature-item">✓ Real-Time Application Tracking</div>
-              <div className="feature-item">✓ Resume Management</div>
+              <div className="feature-item">
+                <span className="feature-icon">🔍</span>
+                <div>
+                  <strong>AI-Powered Search</strong>
+                  <span>Find the perfect match instantly</span>
+                </div>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">📊</span>
+                <div>
+                  <strong>Real-Time Tracking</strong>
+                  <span>Monitor applications live</span>
+                </div>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">📄</span>
+                <div>
+                  <strong>Resume Management</strong>
+                  <span>Smart profile builder</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="decoration-stats">
+              <div className="deco-stat">
+                <strong>10K+</strong>
+                <span>Active Jobs</span>
+              </div>
+              <div className="deco-stat">
+                <strong>5K+</strong>
+                <span>Companies</span>
+              </div>
+              <div className="deco-stat">
+                <strong>50K+</strong>
+                <span>Hires Made</span>
+              </div>
             </div>
           </div>
         </div>

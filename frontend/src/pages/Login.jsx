@@ -12,6 +12,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,9 +41,12 @@ export default function Login() {
       <div className="auth-container">
         <div className="auth-card">
           <div className="auth-header">
-            <div className="auth-icon">🔐</div>
+            <div className="auth-logo">
+              <span className="auth-logo-icon">💼</span>
+              <span className="auth-logo-text">SmartHire</span>
+            </div>
             <h1>Welcome Back</h1>
-            <p>Sign in to your SmartHire account</p>
+            <p>Sign in to continue to your dashboard</p>
           </div>
 
           {error && (
@@ -53,40 +57,55 @@ export default function Login() {
 
           <GoogleAuthButton />
 
-          <div style={{ textAlign: 'center', margin: '1rem 0', color: 'var(--text-muted)', fontSize: '0.9rem', position: 'relative' }}>
-            <span style={{ background: 'var(--bg-card)', padding: '0 10px', position: 'relative', zIndex: 1 }}>OR</span>
-            <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: 'var(--border-color)', zIndex: 0 }}></div>
+          <div className="auth-divider">
+            <span>or continue with email</span>
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
               <label htmlFor="email">Email Address</label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-                autoFocus
-              />
+              <div className="input-icon-wrapper">
+                <span className="input-icon">✉️</span>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  required
+                  autoFocus
+                  className="input-with-icon"
+                />
+              </div>
             </div>
 
             <div className="form-group">
               <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-              />
+              <div className="input-icon-wrapper">
+                <span className="input-icon">🔒</span>
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  className="input-with-icon"
+                />
+                <button
+                  type="button"
+                  className="input-toggle-btn"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
             </div>
 
             <button
               type="submit"
-              className="btn btn-primary btn-full"
+              className="btn btn-primary btn-full btn-auth-submit"
               disabled={loading}
             >
               {loading ? (
@@ -94,7 +113,7 @@ export default function Login() {
                   <span className="spinner-sm"></span> Signing in...
                 </span>
               ) : (
-                'Sign In'
+                <>Sign In <span className="btn-arrow">→</span></>
               )}
             </button>
           </form>
@@ -108,13 +127,51 @@ export default function Login() {
         </div>
 
         <div className="auth-decoration">
+          <div className="auth-decoration-bg">
+            <div className="floating-shape shape-1"></div>
+            <div className="floating-shape shape-2"></div>
+            <div className="floating-shape shape-3"></div>
+          </div>
           <div className="decoration-content">
             <h2>SmartHire Portal</h2>
-            <p>Your intelligent recruitment companion. Connect talent with opportunity.</p>
+            <p>Your intelligent recruitment companion. Connect talent with opportunity seamlessly.</p>
             <div className="decoration-features">
-              <div className="feature-item">✓ AI-Powered Candidate Search</div>
-              <div className="feature-item">✓ Real-Time Application Tracking</div>
-              <div className="feature-item">✓ Resume Management</div>
+              <div className="feature-item">
+                <span className="feature-icon">🔍</span>
+                <div>
+                  <strong>AI-Powered Search</strong>
+                  <span>Find the perfect match instantly</span>
+                </div>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">📊</span>
+                <div>
+                  <strong>Real-Time Tracking</strong>
+                  <span>Monitor applications live</span>
+                </div>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">📄</span>
+                <div>
+                  <strong>Resume Management</strong>
+                  <span>Smart profile builder</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="decoration-stats">
+              <div className="deco-stat">
+                <strong>10K+</strong>
+                <span>Active Jobs</span>
+              </div>
+              <div className="deco-stat">
+                <strong>5K+</strong>
+                <span>Companies</span>
+              </div>
+              <div className="deco-stat">
+                <strong>50K+</strong>
+                <span>Hires Made</span>
+              </div>
             </div>
           </div>
         </div>

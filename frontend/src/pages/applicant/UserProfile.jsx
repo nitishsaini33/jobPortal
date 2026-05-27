@@ -3,10 +3,11 @@ import { usersAPI } from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 
 export default function UserProfile() {
-  const { user, login } = useAuth(); // We might need to refresh auth context if name changes
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
+  const [activeTab, setActiveTab] = useState('basic');
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -76,16 +77,13 @@ export default function UserProfile() {
       const res = await usersAPI.updateProfile(formData, resumeFile);
       setMessage({ text: 'Profile updated successfully!', type: 'success' });
       setExistingResumeUrl(res.data.resumeUrl || '');
-      setResumeFile(null); // Clear file input
-      
+      setResumeFile(null);
+
       // Update local storage user if name changed
       if (user && user.fullName !== res.data.fullName) {
         const updatedUser = { ...user, fullName: res.data.fullName };
         localStorage.setItem('smarthire_user', JSON.stringify(updatedUser));
-        // Note: the AuthContext doesn't have an update method besides login/logout
-        // For now, refreshing page or next login will sync it perfectly, but this updates local storage.
       }
-      
     } catch (err) {
       console.error('Failed to update profile', err);
       setMessage({ text: err.response?.data?.message || 'Failed to update profile.', type: 'error' });
@@ -93,6 +91,15 @@ export default function UserProfile() {
       setSaving(false);
     }
   };
+
+  const tabs = [
+    { id: 'basic', label: 'Basic Info', icon: '👤' },
+    { id: 'professional', label: 'Professional', icon: '💼' },
+    { id: 'background', label: 'Background', icon: '🎓' },
+    { id: 'links', label: 'Links & Resume', icon: '🔗' },
+  ];
+
+  const skillList = formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(Boolean) : [];
 
   if (loading) {
     return (
@@ -104,150 +111,247 @@ export default function UserProfile() {
 
   return (
     <div className="dashboard">
-      <div className="dashboard-header">
-        <h1>My Profile</h1>
-        <p>Manage your personal information and professional details</p>
+      {/* Profile Header */}
+      <div className="profile-hero">
+        <div className="profile-hero-bg"></div>
+        <div className="profile-hero-content">
+          <div className="profile-avatar">
+            {formData.fullName?.charAt(0)?.toUpperCase() || '?'}
+          </div>
+          <div className="profile-hero-info">
+            <h1>{formData.fullName || 'Your Name'}</h1>
+            <p className="profile-hero-email">✉️ {formData.email}</p>
+            <div className="profile-hero-badges">
+              {formData.phone && <span className="profile-badge">📱 {formData.phone}</span>}
+              {formData.dob && <span className="profile-badge">🎂 {new Date(formData.dob).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>}
+              {existingResumeUrl && <span className="profile-badge profile-badge-success">📄 Resume Uploaded</span>}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="card" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
-        {message.text && (
-          <div style={{
-            padding: '1rem', marginBottom: '1.5rem', borderRadius: 'var(--radius-sm)',
-            backgroundColor: message.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-            color: message.type === 'success' ? 'var(--color-success)' : 'var(--color-error)',
-            border: `1px solid ${message.type === 'success' ? 'var(--color-success)' : 'var(--color-error)'}`
-          }}>
-            {message.text}
-          </div>
-        )}
+      {/* Skill pills preview */}
+      {skillList.length > 0 && (
+        <div className="profile-skills-preview">
+          {skillList.map((skill, i) => (
+            <span key={i} className="skill-tag">{skill}</span>
+          ))}
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          {/* Basic Details */}
-          <section>
-            <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
-              Basic Details
-            </h3>
-            <div className="form-row">
-              <div className="form-group" style={{ flex: 1 }}>
-                <label>Full Name</label>
-                <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} required />
-              </div>
-              <div className="form-group" style={{ flex: 1 }}>
-                <label>Email Address</label>
-                <input type="email" name="email" value={formData.email} disabled style={{ backgroundColor: 'var(--bg-secondary)', cursor: 'not-allowed' }} />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group" style={{ flex: 1 }}>
-                <label>Contact Number</label>
-                <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="+1 234 567 8900" />
-              </div>
-              <div className="form-group" style={{ flex: 1 }}>
-                <label>Date of Birth</label>
-                <input type="date" name="dob" value={formData.dob} onChange={handleChange} />
-              </div>
-            </div>
-          </section>
+      {/* Success/Error Message */}
+      {message.text && (
+        <div className={`profile-message profile-message-${message.type}`}>
+          {message.type === 'success' ? '✅' : '⚠️'} {message.text}
+        </div>
+      )}
 
-          {/* About & Skills */}
-          <section>
-            <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
-              Professional Summary
-            </h3>
-            <div className="form-group">
-              <label>About Me</label>
-              <textarea 
-                name="profileSummary" 
-                value={formData.profileSummary} 
-                onChange={handleChange} 
-                rows="4" 
-                placeholder="Write a brief summary about your professional background and career goals..." 
-              />
-            </div>
-            <div className="form-group">
-              <label>Skills (comma separated)</label>
-              <input 
-                type="text" 
-                name="skills" 
-                value={formData.skills} 
-                onChange={handleChange} 
-                placeholder="e.g. Java, React, SQL, Project Management" 
-              />
-            </div>
-          </section>
+      {/* Tab Navigation */}
+      <div className="profile-tabs">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            className={`profile-tab ${activeTab === tab.id ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
+            type="button"
+          >
+            <span className="profile-tab-icon">{tab.icon}</span>
+            <span className="profile-tab-label">{tab.label}</span>
+          </button>
+        ))}
+      </div>
 
-          {/* Education & Experience */}
-          <section>
-            <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
-              Background
-            </h3>
-            <div className="form-group">
-              <label>Education</label>
-              <textarea 
-                name="education" 
-                value={formData.education} 
-                onChange={handleChange} 
-                rows="3" 
-                placeholder="E.g. B.S. in Computer Science, University of Technology (2018-2022)" 
-              />
-            </div>
-            <div className="form-group">
-              <label>Experience</label>
-              <textarea 
-                name="experience" 
-                value={formData.experience} 
-                onChange={handleChange} 
-                rows="3" 
-                placeholder="E.g. Software Engineer at TechCorp (2022-Present)" 
-              />
-            </div>
-          </section>
+      {/* Form */}
+      <form onSubmit={handleSubmit}>
+        <div className="profile-section-card">
 
-          {/* Social Links */}
-          <section>
-            <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
-              Social Links
-            </h3>
-            <div className="form-row">
-              <div className="form-group" style={{ flex: 1 }}>
-                <label>LinkedIn URL</label>
-                <input type="url" name="linkedinUrl" value={formData.linkedinUrl} onChange={handleChange} placeholder="https://linkedin.com/in/username" />
+          {/* Tab: Basic Info */}
+          {activeTab === 'basic' && (
+            <div className="profile-tab-content">
+              <div className="profile-section-header">
+                <h3>👤 Basic Information</h3>
+                <p>Your personal details and contact information</p>
               </div>
-              <div className="form-group" style={{ flex: 1 }}>
-                <label>GitHub URL</label>
-                <input type="url" name="githubUrl" value={formData.githubUrl} onChange={handleChange} placeholder="https://github.com/username" />
+              <div className="form-row">
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Full Name</label>
+                  <div className="input-icon-wrapper">
+                    <span className="input-icon">🙍</span>
+                    <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} required className="input-with-icon" />
+                  </div>
+                </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Email Address</label>
+                  <div className="input-icon-wrapper">
+                    <span className="input-icon">✉️</span>
+                    <input type="email" name="email" value={formData.email} disabled className="input-with-icon" style={{ opacity: 0.6, cursor: 'not-allowed' }} />
+                  </div>
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Contact Number</label>
+                  <div className="input-icon-wrapper">
+                    <span className="input-icon">📱</span>
+                    <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="+1 234 567 8900" className="input-with-icon" />
+                  </div>
+                </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Date of Birth</label>
+                  <div className="input-icon-wrapper">
+                    <span className="input-icon">📅</span>
+                    <input type="date" name="dob" value={formData.dob} onChange={handleChange} className="input-with-icon" />
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="form-group">
-              <label>Portfolio / Personal Website</label>
-              <input type="url" name="portfolioUrl" value={formData.portfolioUrl} onChange={handleChange} placeholder="https://myportfolio.com" />
-            </div>
-          </section>
+          )}
 
-          {/* Resume */}
-          <section>
-            <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
-              Resume
-            </h3>
-            <div className="form-group">
-              <label>Upload Master Resume (PDF, DOCX)</label>
-              <input type="file" accept=".pdf,.doc,.docx" onChange={handleFileChange} />
-              {existingResumeUrl && !resumeFile && (
-                <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-success)' }}>
-                  ✓ A resume is currently uploaded. Uploading a new one will replace it.
-                </p>
+          {/* Tab: Professional */}
+          {activeTab === 'professional' && (
+            <div className="profile-tab-content">
+              <div className="profile-section-header">
+                <h3>💼 Professional Summary</h3>
+                <p>Tell recruiters about yourself and your skills</p>
+              </div>
+              <div className="form-group">
+                <label>About Me</label>
+                <textarea
+                  name="profileSummary"
+                  value={formData.profileSummary}
+                  onChange={handleChange}
+                  rows="5"
+                  placeholder="Write a compelling summary about your professional background, career goals, and what makes you unique..."
+                />
+              </div>
+              <div className="form-group">
+                <label>Skills (comma separated)</label>
+                <div className="input-icon-wrapper">
+                  <span className="input-icon">🛠️</span>
+                  <input
+                    type="text"
+                    name="skills"
+                    value={formData.skills}
+                    onChange={handleChange}
+                    placeholder="e.g. Java, React, SQL, Project Management"
+                    className="input-with-icon"
+                  />
+                </div>
+              </div>
+              {skillList.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '-0.5rem' }}>
+                  {skillList.map((skill, i) => (
+                    <span key={i} className="skill-tag">{skill}</span>
+                  ))}
+                </div>
               )}
             </div>
-          </section>
+          )}
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-            <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? 'Saving...' : 'Save Profile'}
-            </button>
+          {/* Tab: Background */}
+          {activeTab === 'background' && (
+            <div className="profile-tab-content">
+              <div className="profile-section-header">
+                <h3>🎓 Education & Experience</h3>
+                <p>Your academic and professional background</p>
+              </div>
+              <div className="form-group">
+                <label>🎓 Education</label>
+                <textarea
+                  name="education"
+                  value={formData.education}
+                  onChange={handleChange}
+                  rows="4"
+                  placeholder={"B.S. in Computer Science\nUniversity of Technology (2018-2022)\nGPA: 3.8/4.0"}
+                />
+              </div>
+              <div className="form-group">
+                <label>💼 Experience</label>
+                <textarea
+                  name="experience"
+                  value={formData.experience}
+                  onChange={handleChange}
+                  rows="4"
+                  placeholder={"Software Engineer at TechCorp\nJan 2022 - Present\n• Built scalable APIs serving 1M+ requests/day"}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Tab: Links & Resume */}
+          {activeTab === 'links' && (
+            <div className="profile-tab-content">
+              <div className="profile-section-header">
+                <h3>🔗 Social Links & Resume</h3>
+                <p>Connect your online presence and upload your resume</p>
+              </div>
+              <div className="form-row">
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>LinkedIn</label>
+                  <div className="input-icon-wrapper">
+                    <span className="input-icon">🔗</span>
+                    <input type="url" name="linkedinUrl" value={formData.linkedinUrl} onChange={handleChange} placeholder="https://linkedin.com/in/username" className="input-with-icon" />
+                  </div>
+                </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>GitHub</label>
+                  <div className="input-icon-wrapper">
+                    <span className="input-icon">💻</span>
+                    <input type="url" name="githubUrl" value={formData.githubUrl} onChange={handleChange} placeholder="https://github.com/username" className="input-with-icon" />
+                  </div>
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Portfolio / Personal Website</label>
+                <div className="input-icon-wrapper">
+                  <span className="input-icon">🌐</span>
+                  <input type="url" name="portfolioUrl" value={formData.portfolioUrl} onChange={handleChange} placeholder="https://myportfolio.com" className="input-with-icon" />
+                </div>
+              </div>
+
+              <div className="profile-resume-section">
+                <div className="profile-resume-info">
+                  <span className="profile-resume-icon">📄</span>
+                  <div>
+                    <strong>Master Resume</strong>
+                    <p>Upload your latest resume (PDF, DOCX)</p>
+                  </div>
+                </div>
+                <input type="file" id="resumeUpload" accept=".pdf,.doc,.docx" onChange={handleFileChange} style={{ display: 'none' }} />
+                <label htmlFor="resumeUpload" className="btn btn-outline btn-sm" style={{ cursor: 'pointer' }}>
+                  {resumeFile ? `📎 ${resumeFile.name}` : 'Choose File'}
+                </label>
+              </div>
+              {existingResumeUrl && !resumeFile && (
+                <div className="profile-resume-status">
+                  ✅ A resume is currently uploaded. Uploading a new one will replace it.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Save Button */}
+        <div className="profile-save-bar">
+          <div className="profile-save-hint">
+            {activeTab !== 'links' && (
+              <button type="button" className="btn btn-outline btn-sm" onClick={() => {
+                const idx = tabs.findIndex(t => t.id === activeTab);
+                if (idx < tabs.length - 1) setActiveTab(tabs[idx + 1].id);
+              }}>
+                Next: {tabs[tabs.findIndex(t => t.id === activeTab) + 1]?.label} →
+              </button>
+            )}
           </div>
-        </form>
-      </div>
+          <button type="submit" className="btn btn-primary btn-auth-submit" disabled={saving}>
+            {saving ? (
+              <span className="btn-loading"><span className="spinner-sm"></span> Saving...</span>
+            ) : (
+              <>💾 Save Profile</>
+            )}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
